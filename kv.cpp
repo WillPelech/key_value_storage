@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <mutex>
+#include <filesystem>
 #include <yaml-cpp/yaml.h>
 
 struct kv_settings
@@ -48,10 +50,37 @@ node_settings get_node_from_fp(std::string file_name, std::string node_id){
     return node_settings(node_id,listen_port,kv_port);
 }
 
+class KV_store {
+    public:
+    KV_store(const kv_settings& kv_config):config(kv_config){
+        std::filesystem::create_directories(kv_config.data_dir);
+    }
+
+    std::optional<std::string> get (std::string key){
+        std::scoped_lock lk(mu);
+        auto result = kv.find(key);
+        return result->second;
+
+    }
+
+    void put(std::string key, std::string value){
+        std::scoped_lock lk(mu);
+        kv[key]=value;
+        return; 
+    }
+
+    private:
+    kv_settings config;
+    std::unordered_map<std::string,std::string> kv;
+    mutable std::mutex mu;
+
+}
 int main(){ 
     kv_settings conf = get_kv_from_fp("kv.yaml");
-    node_settings node_conf = ("kv.yaml","node");
-
+    node_settings node_conf = ("kv.yaml","node1");
+    YA
+    
+    
 
 }
 
