@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdexcept>
 #include <mutex>
+#include <optional>
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
 
@@ -24,13 +25,11 @@ struct kv_settings
 };
 
 struct node_settings{
-    node_setting(std::string& nid, std::string& lp, std::string kvp):
-    node_id(nid), listen_port(lp),kv_port(kvp){
-
-    }
     std::string node_id;
     std::string listen_port;
     std::string kv_port;
+    node_settings(std::string& nid, std::string& lp, std::string kvp):
+    node_id(nid), listen_port(lp),kv_port(kvp){}
 };
 
 
@@ -47,38 +46,36 @@ kv_settings get_kv_from_fp(std::string file_name){
 
 node_settings get_node_from_fp(std::string file_name, std::string node_id){
     YAML::Node node_conf = YAML::LoadFile(file_name);
-    YAML::Node node = config[node_id];
-    std::string node_id = node["node_id"];
-    std::string listen_port = node["listen_port"];
-    std::string kv_port = node["kv_port"];
-    return node_settings(node_id,listen_port,kv_port);
+    YAML::Node node =node_conf[node_id];
+    std::string node_id_ret = node["node_id"].as<std::string>();
+    std::string listen_port = node["listen_port"].as<std::string>();
+    std::string kv_port = node["kv_port"].as<std::string>();
+    return node_settings(node_id_ret,listen_port,kv_port);
 }
 
 class KV_store {
+    private:
+    kv_settings config;
+    std::unordered_map<std::string,std::string> kv;
+    mutable std::mutex mu_;
     public:
     KV_store(const kv_settings& kv_config):config(kv_config){
         std::filesystem::create_directories(kv_config.data_dir);
     }
 
-    std::optional<std::string> get (std::string key){
-        std::scoped_lock lk(mu);
+    std::optional<std::string> get(std::string key){
+        std::scoped_lock lk(mu_);
         auto result = kv.find(key);
         return result->second;
-
     }
 
     void put(std::string key, std::string value){
-        std::scoped_lock lk(mu);
+        std::scoped_lock lk(mu_);
         kv[key]=value;
         return; 
     }
-
-    private:
-    kv_settings config;
-    std::unordered_map<std::string,std::string> kv;
-    mutable std::mutex mu;
-
 };
+
 int main(){ 
     kv_settings conf = get_kv_from_fp("kv.yaml");
     node_settings node_conf = get_node_from_fp("kv.yaml","node1");
