@@ -24,6 +24,10 @@ struct kv_settings
 };
 
 struct node_settings{
+    node_setting(std::string& nid, std::string& lp, std::string kvp):
+    node_id(nid), listen_port(lp),kv_port(kvp){
+
+    }
     std::string node_id;
     std::string listen_port;
     std::string kv_port;
@@ -74,13 +78,11 @@ class KV_store {
     std::unordered_map<std::string,std::string> kv;
     mutable std::mutex mu;
 
-}
+};
 int main(){ 
     kv_settings conf = get_kv_from_fp("kv.yaml");
-    node_settings node_conf = ("kv.yaml","node1");
-    YA
-    
-    
+    node_settings node_conf = get_node_from_fp("kv.yaml","node1");
+    KV_store key_value_storage = KV_store(conf);
 
 }
 
