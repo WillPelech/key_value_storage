@@ -1,0 +1,3 @@
+/Users/willpelech/projects/key_value_storage/build/CMakeFiles/kv.dir
+/Users/willpelech/projects/key_value_storage/build/CMakeFiles/edit_cache.dir
+/Users/willpelech/projects/key_value_storage/build/CMakeFiles/rebuild_cache.dir

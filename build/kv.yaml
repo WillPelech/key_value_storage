@@ -1,0 +1,13 @@
+version: '3.9'
+
+kv:
+  data_dir: "./data"
+  filename: "kv.yaml"
+  lock_timeout: 10000
+  poll_interval: 50 
+  backup_on_write: false
+  log_path: "/data/kv.log"
+node1:
+  node_id: "node1"
+  listen_port: "9001"
+  kv_port: "7001"
