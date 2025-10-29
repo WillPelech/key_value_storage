@@ -810,6 +810,7 @@ CMakeFiles/kv.dir/kv.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/path_iterator.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/recursive_directory_iterator.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/u8path.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/fstream \
   /opt/homebrew/opt/yaml-cpp/include/yaml-cpp/yaml.h \
   /opt/homebrew/opt/yaml-cpp/include/yaml-cpp/parser.h \
   /opt/homebrew/opt/yaml-cpp/include/yaml-cpp/dll.h \
