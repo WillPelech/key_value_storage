@@ -4,7 +4,9 @@
 #include <stdexcept>
 #include <mutex>
 #include <optional>
+#include <unordered_map>
 #include <filesystem>
+#include <fstream>
 #include <yaml-cpp/yaml.h>
 
 struct kv_settings
@@ -15,7 +17,7 @@ struct kv_settings
     bool backup_on_write;
     std::string log_path;
     
-    kv_settings(std::string& dir, int timeout, int interval, bool backup, std::string& log)
+    kv_settings(const std::string& dir, int timeout, int interval, bool backup,const std::string& log)
         : data_dir(dir)
         , lock_time_out(timeout)
         , poll_interval(interval)
@@ -28,7 +30,7 @@ struct node_settings{
     std::string node_id;
     std::string listen_port;
     std::string kv_port;
-    node_settings(std::string& nid, std::string& lp, std::string kvp):
+    node_settings(const std::string& nid,const std::string& lp,const std::string kvp):
     node_id(nid), listen_port(lp),kv_port(kvp){}
 };
 
@@ -63,9 +65,13 @@ class KV_store {
         std::filesystem::create_directories(kv_config.data_dir);
     }
 
-    std::optional<std::string> get(std::string key){
+    std::string get(std::string key){
         std::scoped_lock lk(mu_);
         auto result = kv.find(key);
+        if(result ==kv.end()){
+            log("Key not found");
+            return "";
+        }
         return result->second;
     }
 
@@ -74,13 +80,33 @@ class KV_store {
         kv[key]=value;
         return; 
     }
+    void log(const std::string& message){
+        // Ensure parent directory exists
+        std::filesystem::path logPath(config.log_path);
+        if(logPath.has_parent_path()){
+            std::filesystem::create_directories(logPath.parent_path());
+        }
+        
+        std::ofstream logFile(config.log_path, std::ios_base::app);
+        if(!logFile.is_open()){
+            std::cerr << "Failed to open log file: " << config.log_path << "\n";
+            return;
+        }
+        logFile << message << "\n";
+        logFile.close();
+    }
 };
 
 int main(){ 
     kv_settings conf = get_kv_from_fp("kv.yaml");
+    std::cout << conf.log_path << "\n";
     node_settings node_conf = get_node_from_fp("kv.yaml","node1");
     KV_store key_value_storage = KV_store(conf);
 
+    key_value_storage.put("test","test");
+    std::cout<<key_value_storage.get("test")<<"\n";
+ //   key_value_storage.put("qpaso","mwah mwah mwah");
+    std::cout<<key_value_storage.get("qpaso")<<"\n";
 }
 
 

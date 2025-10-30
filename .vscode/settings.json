@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.dbclient-js": "javascript",
+        "mutex": "cpp",
+        "__bit_reference": "cpp",
+        "__hash_table": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "unordered_map": "cpp",
+        "__string": "cpp"
+    }
+}
