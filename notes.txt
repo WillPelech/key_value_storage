@@ -21,3 +21,7 @@ Four way handshake:
 What is creating a server socket:
  Creating a server socket is the process of setting up a socket that is bound to a specific port and address
  , and is listening for incoming connections from clients.   
+ 
+bind ->
+the way that bind works is that it will attach local address
+to and pn to a socket

@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include <fstream>
+#include <sys/socket.h>
 #include <yaml-cpp/yaml.h>
 
 struct kv_settings
@@ -28,9 +29,9 @@ struct kv_settings
 
 struct node_settings{
     std::string node_id;
-    std::string listen_port;
+    int listen_port;
     std::string kv_port;
-    node_settings(const std::string& nid,const std::string& lp,const std::string kvp):
+    node_settings(const std::string& nid,int lp,const std::string kvp):
     node_id(nid), listen_port(lp),kv_port(kvp){}
 };
 
@@ -50,7 +51,7 @@ node_settings get_node_from_fp(std::string file_name, std::string node_id){
     YAML::Node node_conf = YAML::LoadFile(file_name);
     YAML::Node node =node_conf[node_id];
     std::string node_id_ret = node["node_id"].as<std::string>();
-    std::string listen_port = node["listen_port"].as<std::string>();
+    int listen_port = node["listen_port"].as<int>();
     std::string kv_port = node["kv_port"].as<std::string>();
     return node_settings(node_id_ret,listen_port,kv_port);
 }
@@ -88,6 +89,27 @@ class KV_store {
 
     }
 };
+int create_server_socket(int port){
+// domain, type sock_stream for tcp, sock_dram for udp, protocol typically 0
+    int server_socket = socket(AF_INET,SOCK_STREAM,0);   
+    if(server_socket == -1){
+        throw std::runtime_error("Failed to create server socket");
+    }
+    sock_addr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(port);
+    server_address.sin_addr.s_addr = INADDR_ANY;
+    if(bind(server_socket,(sock_addr*)&server_address,sizeof(server_address)) == -1){
+        close(server_socket);
+        throw std::runtime_error("Failed to bind server socket");
+    
+    }
+    if(listen(server_socket,5) == -1){
+        close(server_socket);
+        throw std::runtime_error("Failed to listen on server socket");
+    }
+    return server_socket;
+}
 
 int main(){ 
     kv_settings conf = get_kv_from_fp("kv.yaml");
@@ -98,6 +120,8 @@ int main(){
     std::cout<<key_value_storage.get("test")<<"\n";
     key_value_storage.put("qpaso","mwah mwah mwah");
     std::cout<<key_value_storage.get("qpaso")<<"\n";
+    std::cout<<server_socket(node_conf.listen_port) << "\n";
+
 }
 /*
 
