@@ -81,32 +81,30 @@ class KV_store {
         return; 
     }
     void log(const std::string& message){
-        // Ensure parent directory exists
-        std::filesystem::path logPath(config.log_path);
-        if(logPath.has_parent_path()){
-            std::filesystem::create_directories(logPath.parent_path());
-        }
-        
-        std::ofstream logFile(config.log_path, std::ios_base::app);
-        if(!logFile.is_open()){
-            std::cerr << "Failed to open log file: " << config.log_path << "\n";
-            return;
-        }
-        logFile << message << "\n";
+
+        std::ofstream logFile(config.log_path,std::ios_base::app);
+        logFile<<message<<"\n";
         logFile.close();
+
     }
 };
 
 int main(){ 
     kv_settings conf = get_kv_from_fp("kv.yaml");
-    std::cout << conf.log_path << "\n";
     node_settings node_conf = get_node_from_fp("kv.yaml","node1");
     KV_store key_value_storage = KV_store(conf);
 
     key_value_storage.put("test","test");
     std::cout<<key_value_storage.get("test")<<"\n";
- //   key_value_storage.put("qpaso","mwah mwah mwah");
+    key_value_storage.put("qpaso","mwah mwah mwah");
     std::cout<<key_value_storage.get("qpaso")<<"\n";
 }
+/*
 
+{a,b} pq, leader selection, id number
+_update time _ 50 ms 
+{a,b} 
+{a,b}
+
+*/
 

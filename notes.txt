@@ -1,0 +1,23 @@
+So the goal of this is to create some sort of resource bank for the project:
+1) Boost: https://www.boost.org/doc/libs/1_63_0/doc/html/boost_asio.html
+2) https://www.codingwiththomas.com/blog/boost-asio-server-client-example
+
+Overview of TCP and UTP:
+
+TCP:
+Three way handshake:
+    SYN - Client to server
+    SYN-ACK - Server to client
+    ACK - Client to server
+DATA TRANSFER:
+    DATA - Client to server
+    DATA - Server to client
+Four way handshake:
+    FIN - Client to server
+    FIN-ACK - Server to client
+    ACK - Client to server
+    FIN - Server to client
+
+What is creating a server socket:
+ Creating a server socket is the process of setting up a socket that is bound to a specific port and address
+ , and is listening for incoming connections from clients.   
