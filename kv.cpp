@@ -9,7 +9,11 @@
 #include <fstream>
 #include <sys/socket.h>
 #include <yaml-cpp/yaml.h>
-
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <thread>
+#include <cstring>
 struct kv_settings
 {
     std::string data_dir;
@@ -89,17 +93,23 @@ class KV_store {
 
     }
 };
+// struct sock_addr_in{
+//     uint16_t sin_port;
+//     uint32_t sin_addr;
+//     uint8_t sin_family;
+//     uint8_t sin_zero[8];
+// };
 int create_server_socket(int port){
 // domain, type sock_stream for tcp, sock_dram for udp, protocol typically 0
     int server_socket = socket(AF_INET,SOCK_STREAM,0);   
     if(server_socket == -1){
         throw std::runtime_error("Failed to create server socket");
     }
-    sock_addr_in server_address;
+    sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(port);
     server_address.sin_addr.s_addr = INADDR_ANY;
-    if(bind(server_socket,(sock_addr*)&server_address,sizeof(server_address)) == -1){
+    if(bind(server_socket,(struct sockaddr_in*)&server_address,sizeof(server_address)) == -1){
         close(server_socket);
         throw std::runtime_error("Failed to bind server socket");
     
@@ -109,6 +119,27 @@ int create_server_socket(int port){
         throw std::runtime_error("Failed to listen on server socket");
     }
     return server_socket;
+}
+int server_loop(int server_socket){
+    while (true){
+        int client_socket = accept(server_socket,nullptr,nullptr); 
+        if (client_socket == -1){
+            throw std::runtime_error("Failed to accept client connection");
+        }
+        std::thread client_thread(handle_client,client_socket);
+        client_thread.detach();
+    }    
+
+}
+
+void handle_client(int client_socket) {
+    char buf[1024];
+    for (;;) {
+        ssize_t n = recv(client_socket, buf, sizeof(buf), 0);
+        if (n <= 0) break; // closed or error
+        send(client_socket, buf, n, 0); // echo back
+    }
+    close(client_socket);
 }
 
 int main(){ 
